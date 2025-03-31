@@ -10,6 +10,7 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -61,7 +62,7 @@ public class JwtServiceImpl implements JwtService {
 
     private SecretKey getSignKey() {
         byte[] keys = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(Keys.secretKeyFor(SignatureAlgorithm.HS256).getEncoded());
+        return Keys.hmacShaKeyFor(keys);
     }
 
     @Override
@@ -79,7 +80,6 @@ public class JwtServiceImpl implements JwtService {
                 .expiration(date)
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
-
     }
 
     @Override

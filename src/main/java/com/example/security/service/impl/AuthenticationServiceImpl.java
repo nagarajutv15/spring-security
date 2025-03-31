@@ -11,12 +11,15 @@ import com.example.security.repository.UserRepository;
 import com.example.security.service.AuthenticationService;
 import com.example.security.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Autowired
@@ -39,6 +42,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .lastName(signUpRequest.getLastName())
                 .password(securityConfig.passwordEncoder().encode(signUpRequest.getPassword()))
                 .role(Role.USER)
+                .validate_token(1)
                 .build();
 
         String jwtToken = jwtService.generateToken(user);
@@ -60,6 +64,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .lastName(signUpRequest.getLastName())
                 .password(securityConfig.passwordEncoder().encode(signUpRequest.getPassword()))
                 .role(Role.ADMIN)
+                .validate_token(1)
                 .build();
 
         String jwtToken = jwtService.generateToken(user);
@@ -80,6 +85,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         );
         var user = userRepository.findByEmail(signInRequest.getEmail()).orElseThrow(() ->
                 new IllegalArgumentException("Invalid Username or Password"));
+        user.setValidate_token(1);
+        userRepository.save(user);
         String jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .email(user.getEmail())
@@ -88,5 +95,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .roles(user.getRole())
                 .tokenType(TokenType.Bearer.name())
                 .build();
+    }
+
+    @Override
+    public HttpStatus logout(String token) {
+        String user = jwtService.extractUsername(token);
+        User user1 = userRepository.findByEmail(user).orElseThrow(() -> new IllegalArgumentException("Invalid Token"));
+        if (jwtService.isTokenValid(token, user1) && user1.getValidate_token()==1 ) {
+            user1.setValidate_token(0);
+            userRepository.save(user1);
+            return HttpStatus.OK;
+        } else {
+            return HttpStatus.BAD_REQUEST;
+        }
     }
 }

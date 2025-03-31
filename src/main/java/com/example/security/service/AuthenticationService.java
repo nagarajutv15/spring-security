@@ -3,6 +3,7 @@ package com.example.security.service;
 import com.example.security.model.AuthenticationResponse;
 import com.example.security.model.SignInRequest;
 import com.example.security.model.SignUpRequest;
+import org.springframework.http.HttpStatus;
 
 public interface AuthenticationService {
 
@@ -12,4 +13,5 @@ public interface AuthenticationService {
 
     AuthenticationResponse login(SignInRequest signInRequest);
 
+    HttpStatus logout(String token);
 }

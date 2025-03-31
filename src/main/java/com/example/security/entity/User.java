@@ -28,6 +28,7 @@ public class User implements UserDetails {
     private String firstName;
     private String lastName;
     private String email;
+    private int validate_token;
     @JsonIgnore
     private String password;
 
@@ -49,8 +50,7 @@ public class User implements UserDetails {
         return password;
     }
 
-    @Override
-    public boolean isAccountNonExpired() {
+    public boolean isValidate_token() {
         return true;
     }
 

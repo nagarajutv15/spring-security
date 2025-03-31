@@ -17,4 +17,5 @@ public interface JwtService {
     String getJwtFromCookies(HttpServletRequest request);
 
     ResponseCookie getCleanJwtCookie();
+
 }
